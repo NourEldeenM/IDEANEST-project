@@ -2,16 +2,17 @@
   "name": "ideanest-project",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "build": "npx tsc -w",
-    "dev": "concurrently \"npm run build\" \"nodemon dist/index.js\"",
-    "start": "node dist/index.js"
+    "dev": "concurrently \"npm run build\" \"nodemon dist/server.js\"",
+    "start": "node dist/server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.7",
     "express": "^4.21.1",
     "nodemon": "^3.1.7",
     "rimraf": "^6.0.1",
@@ -20,6 +21,8 @@
   "dependencies": {
     "@types/express": "^5.0.0",
     "@types/node": "^22.7.9",
-    "concurrently": "^9.0.1"
+    "concurrently": "^9.0.1",
+    "dotenv": "^16.4.5",
+    "jsonwebtoken": "^9.0.2"
   }
 }
