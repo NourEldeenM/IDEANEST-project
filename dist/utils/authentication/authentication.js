@@ -11,7 +11,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 exports.SECRET_KEY = process.env.JWT_SECRET;
 function authenticate(req, res, next) {
-    const authHeader = req.header("Authorization");
+    const authHeader = req.header("Authorization") || req.header("authorization");
     if (!authHeader)
         throw error_1.AppError.unauthorized("unauthorized");
     const token = authHeader.split(" ")[1];

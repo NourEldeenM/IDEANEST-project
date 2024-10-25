@@ -10,5 +10,13 @@ const router = express_1.default.Router();
 router.route("/signup").post(accessController_1.default.createUser);
 router.route("/signin").post(accessController_1.default.validateUser);
 router.route("/refresh-token").post(accessController_1.default.getRefreshToken);
-router.route("/organization").post(authentication_1.authenticate, orgController_1.default.createOrg);
+router
+    .route("/organization")
+    .post(authentication_1.authenticate, orgController_1.default.createOrg)
+    .get(authentication_1.authenticate, orgController_1.default.getAllOrganizations);
+router
+    .route("/organization/:organization_id")
+    .get(authentication_1.authenticate, orgController_1.default.getSingleOrganization)
+    .put(authentication_1.authenticate, orgController_1.default.updateOrganization)
+    .delete(authentication_1.authenticate, orgController_1.default.deleteOrganization);
 module.exports = router;

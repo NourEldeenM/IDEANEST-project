@@ -11,4 +11,67 @@ async function createOrg(req: Request, res: Response, next: NextFunction) {
 	}
 }
 
-export = { createOrg };
+async function getAllOrganizations(
+	req: Request,
+	res: Response,
+	next: NextFunction,
+) {
+	try {
+		const data = await orgService.getAllOrgs(); // response should look like: [{org1}, {org2}]
+		res.status(200).json(data).end();
+	} catch (err) {
+		next(err);
+	}
+}
+
+async function getSingleOrganization(
+	req: Request,
+	res: Response,
+	next: NextFunction,
+) {
+	try {
+		const data = await orgService.getSingleOrg(req.params.organization_id);
+		res.status(200).json(data).end();
+	} catch (err) {
+		next(err);
+	}
+}
+
+async function updateOrganization(
+	req: Request,
+	res: Response,
+	next: NextFunction,
+) {
+	try {
+		const data = await orgService.updateOrg(
+			req.params.organization_id,
+			req.body,
+		);
+		res.status(200).json(data).end();
+	} catch (err) {
+		next(err);
+	}
+}
+
+async function deleteOrganization(
+	req: Request,
+	res: Response,
+	next: NextFunction,
+) {
+	try {
+		const data = await orgService.deleteOrg(
+			req.params.organization_id,
+		);
+		sendSuccess(req, res);
+	} catch (err) {
+		next(err);
+	}
+}
+
+export = {
+	createOrg,
+	getAllOrganizations,
+	getSingleOrganization,
+	updateOrganization,
+	deleteOrganization
+};
