@@ -7,7 +7,10 @@ const port = process.env.PORT ?? 3000;
 
 export function createApp(): Express {
 	const app = express();
-	connectMongoServer();
+	connectMongoServer().catch((err) => {
+		console.error("Failed to connect to MongoDB:", err);
+		process.exit(1);
+	});
 	app.use(express.json());
 	app.use("/", router);
 	app.use(errorMiddleware);

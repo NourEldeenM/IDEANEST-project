@@ -13,10 +13,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createUserRecord = createUserRecord;
+exports.getAllUsersRecords = getAllUsersRecords;
 const error_1 = require("../../utils/error");
 const config_1 = __importDefault(require("../config"));
-const userModel_1 = __importDefault(require("../models/userModel"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
+const connection_1 = require("../models/connection");
 function createHashedPass(password) {
     return __awaiter(this, void 0, void 0, function* () {
         return yield bcrypt_1.default.hash(password, +config_1.default.ACCESS.hashSaltRounds);
@@ -24,16 +25,22 @@ function createHashedPass(password) {
 }
 function createUserRecord(data) {
     return __awaiter(this, void 0, void 0, function* () {
+        const { collection } = yield (0, connection_1.connectMongoServer)();
         data.password = yield createHashedPass(data.password);
-        const existingUser = yield userModel_1.default.findOne({
+        const existingUser = yield collection.findOne({
             $or: [{ email: data.email }, { username: data.name }],
         });
         if (existingUser) {
             throw error_1.AppError.conflict("Username or Email already in use");
         }
-        const newUser = new userModel_1.default(data);
-        yield newUser.save();
-        console.log(newUser);
-        return `User ${data.name} created successfully`;
+        const result = yield collection.insertOne(data);
+        return `User created successfully`;
+    });
+}
+function getAllUsersRecords() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { collection } = yield (0, connection_1.connectMongoServer)();
+        const results = yield collection.find().toArray();
+        return results;
     });
 }

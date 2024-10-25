@@ -12,7 +12,10 @@ const connection_1 = require("./code/models/connection");
 const port = (_a = process.env.PORT) !== null && _a !== void 0 ? _a : 3000;
 function createApp() {
     const app = (0, express_1.default)();
-    (0, connection_1.connectMongoServer)();
+    (0, connection_1.connectMongoServer)().catch((err) => {
+        console.error("Failed to connect to MongoDB:", err);
+        process.exit(1);
+    });
     app.use(express_1.default.json());
     app.use("/", index_1.default);
     app.use(errorMiddleware_1.errorMiddleware);
