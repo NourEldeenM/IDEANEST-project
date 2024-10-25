@@ -8,6 +8,7 @@ interface userObj {
 	name: string;
 	email: string;
 	password: string;
+	
 }
 
 async function createHashedPass(password: string) {

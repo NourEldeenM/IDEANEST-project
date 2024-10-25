@@ -1,10 +1,19 @@
 import { NextFunction, Request, Response } from "express";
 import orgService from "../services/orgService";
 import { sendSuccess } from "../../utils/responses/responses";
+import { CustomRequest } from "../../utils/authentication/authentication";
 
-async function createOrg(req: Request, res: Response, next: NextFunction) {
+async function createOrg(
+	req: CustomRequest,
+	res: Response,
+	next: NextFunction,
+) {
 	try {
-		const orgId = await orgService.createNewOrganization(req.body);
+		const orgId = await orgService.createNewOrganization(
+			req.body,
+			req.token.name,
+			req.token.email,
+		);
 		sendSuccess(req, res, { organization_id: orgId }, 201);
 	} catch (err) {
 		next(err);
@@ -38,14 +47,17 @@ async function getSingleOrganization(
 }
 
 async function updateOrganization(
-	req: Request,
+	req: CustomRequest,
 	res: Response,
 	next: NextFunction,
 ) {
 	try {
+		const { email } = req.token;
+
 		const data = await orgService.updateOrg(
 			req.params.organization_id,
 			req.body,
+			email
 		);
 		res.status(200).json(data).end();
 	} catch (err) {
@@ -54,12 +66,12 @@ async function updateOrganization(
 }
 
 async function deleteOrganization(
-	req: Request,
+	req: CustomRequest,
 	res: Response,
 	next: NextFunction,
 ) {
 	try {
-		const data = await orgService.deleteOrg(req.params.organization_id);
+		const data = await orgService.deleteOrg(req.params.organization_id, req.token.email);
 		sendSuccess(req, res);
 	} catch (err) {
 		next(err);
