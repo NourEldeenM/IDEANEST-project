@@ -7,7 +7,7 @@ export function sendSuccess(
 	status: number = 200,
 	message: string = "operation completed",
 ) {
-	res.status(status).json({ message, data }).end();
+	res.status(status).json({ message, ...data }).end();
 }
 
 export function sendError(

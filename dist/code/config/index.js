@@ -9,6 +9,6 @@ module.exports = {
         mongoDBUrl: (_b = process.env.MONGODB_URL) !== null && _b !== void 0 ? _b : "mongodb://localhost:27017",
     },
     ACCESS: {
-        hashSaltRounds: (_c = process.env.HASH_SALT_ROUNDS) !== null && _c !== void 0 ? _c : 11,
+        hashSaltRounds: (_c = process.env.HASH_SALT_ROUNDS) !== null && _c !== void 0 ? _c : "11",
     },
 };

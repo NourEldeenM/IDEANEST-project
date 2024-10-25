@@ -6,7 +6,7 @@ export class AppError extends Error {
 		name: string,
 		message: string,
 		statusCode: number,
-		errors?: string,
+		errors?: string | undefined,
 	) {
 		super(message);
 		this.name = name ?? "Application Error";
@@ -18,7 +18,7 @@ export class AppError extends Error {
 	static notFound(message: string) {
 		return new AppError("NotFoundError", message, 404);
 	}
-	static badRequest(message: string, errors: string) {
+	static badRequest(message: string, errors?: string | undefined) {
 		return new AppError("BadRequestError", message, 400, errors);
 	}
 	static unauthorized(message: string) {
