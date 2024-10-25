@@ -1,9 +1,13 @@
-import express, { Router, Request, Response } from "express";
+import express, { Router } from "express";
+import { createUser } from "../controllers/accessController";
 
 const router: Router = express.Router();
 
-router.route("/").get((req: Request, res: Response) => {
-	res.end("hello world");
-});
+router.route("/signup").post(createUser);
+// router.route("/signin").post();
+// router.route("/refresh-token").post();
+
+// router.route("/organization").post().get();
+// router.route("/organization/{organization_id}").get().put().delete();
 
 export = router;

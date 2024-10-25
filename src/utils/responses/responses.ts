@@ -3,9 +3,9 @@ import { Request, Response } from "express";
 export function sendSuccess(
 	req: Request,
 	res: Response,
-	message: string = "operation completed",
-	status: number = 200,
 	data = {},
+	status: number = 200,
+	message: string = "operation completed",
 ) {
 	res.status(status).json({ message, data }).end();
 }
@@ -13,9 +13,9 @@ export function sendSuccess(
 export function sendError(
 	req: Request,
 	res: Response,
-	message: string = "operation failed",
-	status: number = 400,
 	data = {},
+	status: number = 400,
+	message: string = "operation failed",
 ) {
 	res.status(status).json({ message, errors: data }).end();
 }
