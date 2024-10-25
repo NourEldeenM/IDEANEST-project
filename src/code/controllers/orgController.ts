@@ -59,10 +59,27 @@ async function deleteOrganization(
 	next: NextFunction,
 ) {
 	try {
-		const data = await orgService.deleteOrg(
-			req.params.organization_id,
-		);
+		const data = await orgService.deleteOrg(req.params.organization_id);
 		sendSuccess(req, res);
+	} catch (err) {
+		next(err);
+	}
+}
+
+async function sentInvitation(req: Request, res: Response, next: NextFunction) {
+	try {
+		await orgService.sendInvite(
+			req.params.organization_id,
+			req.token.email,
+			req.body.user_email,
+		);
+		sendSuccess(
+			req,
+			res,
+			{},
+			200,
+			`invitation sent successfully to ${req.body.user_email}`,
+		);
 	} catch (err) {
 		next(err);
 	}
@@ -73,5 +90,6 @@ export = {
 	getAllOrganizations,
 	getSingleOrganization,
 	updateOrganization,
-	deleteOrganization
+	deleteOrganization,
+	sentInvitation,
 };

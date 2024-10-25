@@ -1,7 +1,14 @@
 import { ObjectId } from "mongodb";
 import { AppError } from "../../utils/error";
-import config from "../config";
 import { connectMongoServer } from "../models/connection";
+require("dotenv").config();
+
+// Mail sending setup
+import { MailtrapClient } from "mailtrap";
+const MAIL_TOKEN = process.env.MAIL_TOKEN;
+const client = new MailtrapClient({
+	token: MAIL_TOKEN,
+});
 
 interface memberObj {
 	name: string;
@@ -37,6 +44,8 @@ async function getSingleOrg(orgId: string) {
 	const collection = await getMongoCollection("organizations");
 	const objectId = new ObjectId(orgId);
 	const record = await collection.findOne({ _id: objectId });
+	if (!record)
+		throw AppError.notFound(`Organization with ID ${orgId} doesn't exits`);
 	return record;
 }
 
@@ -53,10 +62,43 @@ async function updateOrg(orgId: string, data: orgObj) {
 async function deleteOrg(orgId: string) {
 	const collection = await getMongoCollection("organizations");
 	const objectId = new ObjectId(orgId);
-	await collection.findOneAndDelete(
-		{ _id: objectId },
-	);
+	await collection.findOneAndDelete({ _id: objectId });
 	return;
 }
 
-export = { createNewOrganization, getAllOrgs, getSingleOrg, updateOrg, deleteOrg };
+async function sendInvite(
+	orgId: string,
+	senderEmail: string,
+	receiverEmail: string,
+) {
+	const record = await getSingleOrg(orgId);
+	if (!record)
+		throw AppError.notFound(`Organization with id ${orgId} doesn't exist`);
+
+	const sender = {
+		email: "hello@demomailtrap.com", // this should be changed to authenticated user email
+		name: "Organization invitation",
+	};
+	const recipients = [
+		{
+			email: receiverEmail,
+		},
+	];
+
+	await client.send({
+		from: sender,
+		to: recipients,
+		subject: "TEST invitation from nodejs!",
+		text: `Congrats you are invited to join our organization \"${record.name}\" with for sending test email with Mailtrap!`,
+		category: "Mail Test",
+	});
+}
+
+export = {
+	createNewOrganization,
+	getAllOrgs,
+	getSingleOrg,
+	updateOrg,
+	deleteOrg,
+	sendInvite,
+};

@@ -20,4 +20,5 @@ router
 	.put(authenticate, orgController.updateOrganization)
     .delete(authenticate, orgController.deleteOrganization);
 
+router.route("/organization/:organization_id/invite").post(authenticate, orgController.sentInvitation);
 export = router;
