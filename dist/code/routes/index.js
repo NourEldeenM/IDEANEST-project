@@ -6,5 +6,4 @@ const express_1 = __importDefault(require("express"));
 const accessController_1 = require("../controllers/accessController");
 const router = express_1.default.Router();
 router.route("/signup").post(accessController_1.createUser);
-router.route('/').get(accessController_1.getAllUsers);
 module.exports = router;

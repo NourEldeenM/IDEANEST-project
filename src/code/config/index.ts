@@ -6,9 +6,9 @@ export = {
 	},
 	DATABASE: {
 		mongoDBUrl:
-			process.env.MONGODB_URL,
+			process.env.MONGODB_URL ?? "mongodb://localhost:27017/localDB",
 	},
 	ACCESS: {
-		hashSaltRounds: process.env.HASH_SALT_ROUNDS,
+		hashSaltRounds: process.env.HASH_SALT_ROUNDS ?? 11,
 	},
 };
