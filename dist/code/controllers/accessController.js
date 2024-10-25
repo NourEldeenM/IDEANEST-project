@@ -8,17 +8,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.createUser = createUser;
-exports.getAllUsers = getAllUsers;
-exports.validateUser = validateUser;
-const accessService_1 = require("../services/accessService");
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+const accessService_1 = __importDefault(require("../services/accessService"));
 const responses_1 = require("../../utils/responses/responses");
 function createUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const message = yield (0, accessService_1.createUserRecord)(req.body);
-            (0, responses_1.sendSuccess)(req, res, message, 201);
+            const response = yield accessService_1.default.createUserRecord(req.body);
+            (0, responses_1.sendSuccess)(req, res, { data: response }, 201);
         }
         catch (err) {
             next(err);
@@ -28,7 +27,7 @@ function createUser(req, res, next) {
 function getAllUsers(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const data = yield (0, accessService_1.getAllUsersRecords)();
+            const data = yield accessService_1.default.getAllUsersRecords();
             (0, responses_1.sendSuccess)(req, res, data, 201);
         }
         catch (err) {
@@ -39,7 +38,7 @@ function getAllUsers(req, res, next) {
 function validateUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const { accessToken, refreshToken } = yield (0, accessService_1.validateUserRecord)(req.body);
+            const { accessToken, refreshToken } = yield accessService_1.default.validateUserRecord(req.body);
             (0, responses_1.sendSuccess)(req, res, { accessToken, refreshToken }, 201);
         }
         catch (err) {
@@ -47,3 +46,16 @@ function validateUser(req, res, next) {
         }
     });
 }
+function getRefreshToken(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const oldToken = req.body.refresh_token;
+            const { accessToken, refreshToken } = accessService_1.default.getNewTokens(oldToken);
+            (0, responses_1.sendSuccess)(req, res, { accessToken, refreshToken });
+        }
+        catch (err) {
+            next(err);
+        }
+    });
+}
+module.exports = { createUser, getAllUsers, validateUser, getRefreshToken };

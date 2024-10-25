@@ -9,5 +9,6 @@ export = {
 	},
 	ACCESS: {
 		hashSaltRounds: process.env.HASH_SALT_ROUNDS ?? "11",
+		jwt: process.env.JWT_SECRET ?? "secret",
 	},
 };

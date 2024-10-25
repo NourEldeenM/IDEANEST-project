@@ -14,7 +14,7 @@ async function createHashedPass(password: string) {
 	return await bcrypt.hash(password, +config.ACCESS.hashSaltRounds);
 }
 
-export async function createUserRecord(data: userObj) {
+async function createUserRecord(data: userObj) {
 	const { collection } = await connectMongoServer();
 
 	data.password = await createHashedPass(data.password);
@@ -28,18 +28,40 @@ export async function createUserRecord(data: userObj) {
 	}
 
 	await collection.insertOne(data);
-	return `User created successfully`;
+	return "user created successfully";
 }
 
-export async function getAllUsersRecords() {
+async function getAllUsersRecords() {
 	const { collection } = await connectMongoServer();
 	const results = await collection.find().toArray();
 	return results;
 }
 
-export async function validateUserRecord(data: userObj) {
+function generateToken(record: userObj) {
+	const accessToken = jwt.sign(
+		{
+			name: record.name,
+			email: record.email,
+		},
+		config.ACCESS.jwt,
+		{
+			expiresIn: "10m",
+		},
+	);
+	const refreshToken = jwt.sign(
+		{
+			name: record.name,
+			email: record.email,
+		},
+		config.ACCESS.jwt,
+		{ expiresIn: "1d" },
+	);
+	return { accessToken, refreshToken };
+}
+
+async function validateUserRecord(data: userObj) {
 	const { collection } = await connectMongoServer();
-	const { email , password } = data;
+	const { email, password } = data;
 	const record = await collection.findOne<userObj>({ email: email });
 	if (!record) {
 		throw AppError.notFound("User doesn't exist");
@@ -50,24 +72,18 @@ export async function validateUserRecord(data: userObj) {
 	return generateToken(record);
 }
 
-async function generateToken(record: userObj) {
-	const accessToken = jwt.sign(
-		{
-			name: record.name,
-			email: record.email,
-		},
-		config.ACCESS.hashSaltRounds,
-		{
-			expiresIn: "10m",
-		},
-	);
-	const refreshToken = jwt.sign(
-		{
-			name: record.name,
-			email: record.email,
-		},
-		config.ACCESS.hashSaltRounds,
-		{ expiresIn: "1d" },
-	);
-	return { accessToken, refreshToken };
+function getNewTokens(oldToken: string) {
+	const decoded = jwt.verify(oldToken, config.ACCESS.jwt);
+	console.log(decoded);
+	if (!decoded) {
+		throw AppError.badRequest("Invalid refresh token");
+	}
+	return generateToken(decoded);
 }
+
+export = {
+	createUserRecord,
+	getAllUsersRecords,
+	validateUserRecord,
+	getNewTokens,
+};

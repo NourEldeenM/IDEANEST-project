@@ -11,7 +11,7 @@ export async function connectMongoServer() {
 		await client.connect();
 		console.log("MongoDB connected successfully");
 		db = client.db(dbName);
-		collection = db.collection("user");
+		collection = db.collection("users");
 	}
 	return { db, collection };
 }

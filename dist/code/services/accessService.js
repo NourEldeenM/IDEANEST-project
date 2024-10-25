@@ -11,10 +11,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.createUserRecord = createUserRecord;
-exports.getAllUsersRecords = getAllUsersRecords;
-exports.validateUserRecord = validateUserRecord;
 const error_1 = require("../../utils/error");
 const config_1 = __importDefault(require("../config"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
@@ -36,7 +32,7 @@ function createUserRecord(data) {
             throw error_1.AppError.conflict("Username or Email already in use");
         }
         yield collection.insertOne(data);
-        return `User created successfully`;
+        return "user created successfully";
     });
 }
 function getAllUsersRecords() {
@@ -45,6 +41,19 @@ function getAllUsersRecords() {
         const results = yield collection.find().toArray();
         return results;
     });
+}
+function generateToken(record) {
+    const accessToken = jsonwebtoken_1.default.sign({
+        name: record.name,
+        email: record.email,
+    }, config_1.default.ACCESS.jwt, {
+        expiresIn: "10m",
+    });
+    const refreshToken = jsonwebtoken_1.default.sign({
+        name: record.name,
+        email: record.email,
+    }, config_1.default.ACCESS.jwt, { expiresIn: "1d" });
+    return { accessToken, refreshToken };
 }
 function validateUserRecord(data) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -60,18 +69,17 @@ function validateUserRecord(data) {
         return generateToken(record);
     });
 }
-function generateToken(record) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const accessToken = jsonwebtoken_1.default.sign({
-            name: record.name,
-            email: record.email,
-        }, config_1.default.ACCESS.hashSaltRounds, {
-            expiresIn: "10m",
-        });
-        const refreshToken = jsonwebtoken_1.default.sign({
-            name: record.name,
-            email: record.email,
-        }, config_1.default.ACCESS.hashSaltRounds, { expiresIn: "1d" });
-        return { accessToken, refreshToken };
-    });
+function getNewTokens(oldToken) {
+    const decoded = jsonwebtoken_1.default.verify(oldToken, config_1.default.ACCESS.jwt);
+    console.log(decoded);
+    if (!decoded) {
+        throw error_1.AppError.badRequest("Invalid refresh token");
+    }
+    return generateToken(decoded);
 }
+module.exports = {
+    createUserRecord,
+    getAllUsersRecords,
+    validateUserRecord,
+    getNewTokens,
+};
