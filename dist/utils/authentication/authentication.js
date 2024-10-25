@@ -9,10 +9,9 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const error_1 = require("../error");
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
-exports.SECRET_KEY = process.env.SECRET_KEY;
+exports.SECRET_KEY = process.env.JWT_SECRET;
 function authenticate(req, res, next) {
-    var _a;
-    const authHeader = (_a = req.header("Authorization")) === null || _a === void 0 ? void 0 : _a.replace("Bearer ", "");
+    const authHeader = req.header("Authorization");
     if (!authHeader)
         throw error_1.AppError.unauthorized("unauthorized");
     const token = authHeader.split(" ")[1];
@@ -21,8 +20,7 @@ function authenticate(req, res, next) {
         req.token = decoded;
         next();
     }
-    catch (_b) {
+    catch (_a) {
         throw error_1.AppError.unauthorized("invalid token");
     }
 }
-;

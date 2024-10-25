@@ -21,9 +21,16 @@ function createHashedPass(password) {
         return yield bcrypt_1.default.hash(password, +config_1.default.ACCESS.hashSaltRounds);
     });
 }
+function getMongoCollection(collectionName) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const db = yield (0, connection_1.connectMongoServer)();
+        const collection = db.collection(collectionName);
+        return collection;
+    });
+}
 function createUserRecord(data) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { collection } = yield (0, connection_1.connectMongoServer)();
+        const collection = yield getMongoCollection("users");
         data.password = yield createHashedPass(data.password);
         const existingUser = yield collection.findOne({
             $or: [{ email: data.email }, { username: data.name }],
@@ -37,7 +44,7 @@ function createUserRecord(data) {
 }
 function getAllUsersRecords() {
     return __awaiter(this, void 0, void 0, function* () {
-        const { collection } = yield (0, connection_1.connectMongoServer)();
+        const collection = yield getMongoCollection("users");
         const results = yield collection.find().toArray();
         return results;
     });
@@ -57,7 +64,7 @@ function generateToken(record) {
 }
 function validateUserRecord(data) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { collection } = yield (0, connection_1.connectMongoServer)();
+        const collection = yield getMongoCollection("users");
         const { email, password } = data;
         const record = yield collection.findOne({ email: email });
         if (!record) {
@@ -71,7 +78,6 @@ function validateUserRecord(data) {
 }
 function getNewTokens(oldToken) {
     const decoded = jsonwebtoken_1.default.verify(oldToken, config_1.default.ACCESS.jwt);
-    console.log(decoded);
     if (!decoded) {
         throw error_1.AppError.badRequest("Invalid refresh token");
     }

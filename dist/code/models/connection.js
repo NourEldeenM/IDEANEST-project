@@ -25,8 +25,7 @@ function connectMongoServer() {
             yield client.connect();
             console.log("MongoDB connected successfully");
             db = client.db(dbName);
-            collection = db.collection("users");
         }
-        return { db, collection };
+        return db;
     });
 }

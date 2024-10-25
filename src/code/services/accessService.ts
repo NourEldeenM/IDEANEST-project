@@ -14,8 +14,14 @@ async function createHashedPass(password: string) {
 	return await bcrypt.hash(password, +config.ACCESS.hashSaltRounds);
 }
 
+async function getMongoCollection(collectionName: string) {
+	const db = await connectMongoServer();
+	const collection = db.collection(collectionName);
+	return collection;
+}
+
 async function createUserRecord(data: userObj) {
-	const { collection } = await connectMongoServer();
+	const collection = await getMongoCollection("users");
 
 	data.password = await createHashedPass(data.password);
 
@@ -32,7 +38,7 @@ async function createUserRecord(data: userObj) {
 }
 
 async function getAllUsersRecords() {
-	const { collection } = await connectMongoServer();
+	const collection = await getMongoCollection("users");
 	const results = await collection.find().toArray();
 	return results;
 }
@@ -60,7 +66,7 @@ function generateToken(record: userObj) {
 }
 
 async function validateUserRecord(data: userObj) {
-	const { collection } = await connectMongoServer();
+	const collection = await getMongoCollection("users");
 	const { email, password } = data;
 	const record = await collection.findOne<userObj>({ email: email });
 	if (!record) {
@@ -74,7 +80,6 @@ async function validateUserRecord(data: userObj) {
 
 function getNewTokens(oldToken: string) {
 	const decoded = jwt.verify(oldToken, config.ACCESS.jwt);
-	console.log(decoded);
 	if (!decoded) {
 		throw AppError.badRequest("Invalid refresh token");
 	}
