@@ -14,7 +14,7 @@ async function createOrg(
 			req.token.name,
 			req.token.email,
 		);
-		sendSuccess(req, res, { organization_id: orgId }, 201);
+		res.status(201).json({organization_id: orgId}).end();
 	} catch (err) {
 		next(err);
 	}

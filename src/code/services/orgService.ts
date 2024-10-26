@@ -14,13 +14,11 @@ const accessLevels = {
 	OWNER: "OWNER",
 	VISITOR: "VISITOR",
 };
-
 interface memberObj {
 	name: string;
 	email: string;
 	access_level: string;
 }
-
 interface orgObj {
 	name: string;
 	description: string;
@@ -33,6 +31,19 @@ async function getMongoCollection(collectionName: string) {
 	return collection;
 }
 
+function addOrganizationMember(
+	array: memberObj[],
+	name: string,
+	email: string,
+	access_level: string,
+) {
+	array.push({
+		name,
+		email,
+		access_level: access_level,
+	});
+}
+
 async function createNewOrganization(
 	data: orgObj,
 	name: string,
@@ -40,11 +51,12 @@ async function createNewOrganization(
 ) {
 	const collection = await getMongoCollection("organizations");
 	data.organization_members = [];
-	data.organization_members.push({
+	addOrganizationMember(
+		data.organization_members,
 		name,
 		email,
-		access_level: accessLevels.OWNER,
-	});
+		accessLevels.OWNER,
+	);
 	const record = await collection.insertOne(data);
 	return record.insertedId;
 }
@@ -64,17 +76,22 @@ async function getSingleOrg(orgId: string) {
 	return record;
 }
 
-async function updateOrg(orgId: string, data: orgObj, userEmail: string) {
-	const collection = await getMongoCollection("organizations");
-	const objectId = new ObjectId(orgId);
-	const organization = await collection.findOne({ _id: objectId });
-	const owner = organization.organization_members.find(
+function findOrganizationOwner(organization_members: memberObj[]) {
+	return organization_members.find(
 		(user) => user.access_level == accessLevels.OWNER,
 	);
+}
+
+async function updateOrg(orgId: string, data: orgObj, userEmail: string) {
+	const collection = await getMongoCollection("organizations");
+	const organization = await getSingleOrg(orgId);
+	const owner = findOrganizationOwner(organization.organization_members);
+	if (!owner)
+		throw AppError.internalServer(`Can't find owner of organization ${orgId}`);
 	if (owner.email != userEmail)
 		throw AppError.unauthorized("You cannot edit this organization");
 	const record = await collection.findOneAndUpdate(
-		{ _id: objectId },
+		{ _id: new ObjectId(orgId) },
 		{ $set: data },
 	);
 	return record;
@@ -82,14 +99,13 @@ async function updateOrg(orgId: string, data: orgObj, userEmail: string) {
 
 async function deleteOrg(orgId: string, userEmail: string) {
 	const collection = await getMongoCollection("organizations");
-	const objectId = new ObjectId(orgId);
-	const organization = await collection.findOne({ _id: objectId });
-	const owner = organization.organization_members.find(
-		(user) => user.access_level == accessLevels.OWNER,
-	);
+	const organization = await getSingleOrg(orgId);
+	const owner = findOrganizationOwner(organization.organization_members);
+	if (!owner)
+		throw AppError.internalServer(`Can't find owner of organization ${orgId}`);
 	if (owner.email != userEmail)
 		throw AppError.unauthorized("You cannot delete this organization");
-	await collection.findOneAndDelete({ _id: objectId });
+	await collection.findOneAndDelete({ _id: new ObjectId(orgId) });
 	return;
 }
 
